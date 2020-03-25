@@ -78,7 +78,7 @@ async function initOne(
 
   const getUnit = (unitId: string): any => {
     if (one.dependencyInstances[unitId]) {
-      return one.dependencyInstances[unitId];
+      return one.dependencyInstances[unitId].value;
     }
     throw new Error(
       `Unit "${one.id}" cannot reference "${unitId}" because it does not depend on it.`

@@ -6,7 +6,6 @@
   "repository": "git@github.com:eburgos/mreg.git",
   "author": "Eduardo Burgos <eburgos@gmail.com>",
   "license": "MIT",
-  "private": false,
   "devDependencies": {
     "@types/node": "^13.7.7",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
@@ -18,7 +17,6 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "tsc": "./node_modules/.bin/tsc",
-    "lint": "./node_modules/.bin/eslint . --ext .ts,.tsx --fix"
+    "lint": "yarn run eslint . --ext .ts,.tsx --fix"
   }
 }
