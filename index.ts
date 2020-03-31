@@ -62,6 +62,7 @@ async function initOne(
   one: UnitInstance,
   queued: { [name: string]: boolean }
 ): Promise<void> {
+  one.state = "starting";
   const stopped = Object.values(one.dependencyInstances).filter(
     (dep) => dep.state === "stopped"
   );
@@ -73,7 +74,13 @@ async function initOne(
 
   await stopped.reduce(async (acc, next) => {
     await acc;
-    await initOne(next, { ...queued, [next.id]: true });
+    if (next.state === "started") {
+      return acc;
+    } else if (next.state === "starting") {
+      throw new Error("Not supposed to happen");
+    } else {
+      await initOne(next, { ...queued, [next.id]: true });
+    }
   }, Promise.resolve());
 
   const getUnit = (unitId: string): any => {
@@ -109,7 +116,6 @@ async function initOne(
     return acc;
   }, one.dependencyInstances);
 
-  one.state = "starting";
   const config =
     typeof one.config === "function" ? await one.config() : one.config;
   one.value = await one.start(config, getUnit);
@@ -120,8 +126,20 @@ export function init(): Promise<void> {
   const stopped = Object.values(registry).filter(
     (unit) => unit.state === "stopped"
   );
+  stopped.forEach((unit) => {
+    unit.dependencies.forEach((dep) => {
+      const depUnit = registry[dep.id];
+      unit.dependencyInstances[dep.id] = depUnit;
+    });
+  });
   return stopped.reduce(async (acc, next) => {
     await acc;
-    await initOne(next, {});
+    if (next.state === "started") {
+      return acc;
+    } else if (next.state === "starting") {
+      throw new Error("Not supposed to happen");
+    } else {
+      await initOne(next, {});
+    }
   }, Promise.resolve());
 }

@@ -70,6 +70,7 @@ function initOne(one, queued) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
+                    one.state = "starting";
                     stopped = Object.values(one.dependencyInstances).filter(function (dep) { return dep.state === "stopped"; });
                     stopped.forEach(function (dep) {
                         if (queued[dep.id]) {
@@ -83,10 +84,16 @@ function initOne(one, queued) {
                                     case 0: return [4 /*yield*/, acc];
                                     case 1:
                                         _b.sent();
-                                        return [4 /*yield*/, initOne(next, __assign(__assign({}, queued), (_a = {}, _a[next.id] = true, _a)))];
+                                        if (!(next.state === "started")) return [3 /*break*/, 2];
+                                        return [2 /*return*/, acc];
                                     case 2:
+                                        if (!(next.state === "starting")) return [3 /*break*/, 3];
+                                        throw new Error("Not supposed to happen");
+                                    case 3: return [4 /*yield*/, initOne(next, __assign(__assign({}, queued), (_a = {}, _a[next.id] = true, _a)))];
+                                    case 4:
                                         _b.sent();
-                                        return [2 /*return*/];
+                                        _b.label = 5;
+                                    case 5: return [2 /*return*/];
                                 }
                             });
                         }); }, Promise.resolve())];
@@ -117,7 +124,6 @@ function initOne(one, queued) {
                         }
                         return acc;
                     }, one.dependencyInstances);
-                    one.state = "starting";
                     if (!(typeof one.config === "function")) return [3 /*break*/, 3];
                     return [4 /*yield*/, one.config()];
                 case 2:
@@ -141,16 +147,28 @@ function initOne(one, queued) {
 function init() {
     var _this = this;
     var stopped = Object.values(registry).filter(function (unit) { return unit.state === "stopped"; });
+    stopped.forEach(function (unit) {
+        unit.dependencies.forEach(function (dep) {
+            var depUnit = registry[dep.id];
+            unit.dependencyInstances[dep.id] = depUnit;
+        });
+    });
     return stopped.reduce(function (acc, next) { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, acc];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, initOne(next, {})];
+                    if (!(next.state === "started")) return [3 /*break*/, 2];
+                    return [2 /*return*/, acc];
                 case 2:
+                    if (!(next.state === "starting")) return [3 /*break*/, 3];
+                    throw new Error("Not supposed to happen");
+                case 3: return [4 /*yield*/, initOne(next, {})];
+                case 4:
                     _a.sent();
-                    return [2 /*return*/];
+                    _a.label = 5;
+                case 5: return [2 /*return*/];
             }
         });
     }); }, Promise.resolve());
