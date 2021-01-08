@@ -47,6 +47,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.init = exports.define = void 0;
 var registry = {};
 function define(consumes, unit) {
     var normalizedDependencies = (consumes || []).map(function (item) {
